@@ -15,33 +15,53 @@ def client(host, port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((host, port))
     print('Client has been assigned socket name',sock.getsockname())
-    text='start'
-    data=text.encode('ascii')
-    sock.sendall(data)
-    reply, adress=sock.recvfrom(MAX_BYTES)
-    _reply=reply.decode('ascii')
-    print(_reply)
-    for i in range(1,6) :
-        print("Guess the number 1~10 :")
-        guess=input()  #숫자 입력받고
-        data=guess.encode('ascii')
-        sock.sendall(data) #guess 보내기
-        data, adress =sock.recvfrom(MAX_BYTES)
-        answer_str = data.decode('ascii')
-        answer=int(answer_str)
-        if answer == 0:
-            print("Congratulations you did it.")
+
+    while True :
+        print("  <<Guess the number>>  enter  (start) or (close) ")
+        text = input()
+        data=text.encode('ascii')
+        sock.sendall(data)
+        
+        if text == 'start' : #start를 입력받으면 게임 시작
+            reply, adress=sock.recvfrom(MAX_BYTES)
+            _reply=reply.decode('ascii')
+            print(_reply)
+            for i in range(1,6) :
+                print("Guess the number 1~10 (or enter (end) to end the game):")
+                guess=input()  #숫자 입력받고
+                data=guess.encode('ascii')
+                sock.sendall(data) #guess 보내기
+                data, adress =sock.recvfrom(MAX_BYTES)
+                answer_str = data.decode('ascii')
+                answer=int(answer_str)
+                if answer == 0:
+                    print("Congratulations you did it.")
+                    break
+                if answer == 1:
+                    print("You guessed too small!")
+                if answer == 2:
+                    print("You guessed too high!")
+                if answer == 3:
+                    print("restart the game")
+                    break
+                if i == 5:
+                    print("You used up every opportunity.")
+                    i=0
+                
+            continue
+        
+        elif text == 'close' : #close 입력받으면 연결 끝
+            print('End game And Close the connection')
+            sock.sendall(text.encode('ascii'))
+            sock.close()
             break
-        if answer == 1:
-            print("You guessed too small!")
-        if answer == 2:
-            print("You guessed too high!")
-        if i == 5:
-            print("You used up every opportunity.")
+        else :
+            continue
+
             
-    reply=recvall(sock,16)
-    print('The server said', repr(reply))
-    sock.close()
+        
+
+    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Example client')

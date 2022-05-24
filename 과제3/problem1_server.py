@@ -12,35 +12,48 @@ def server(reader, writer) :
 
         if text == 'start' : #start가 들어오면 게임 시작
             flag = 0
+        
+        elif text == "close" :
+            print('Close the connect with client')
+            return
 
         if flag == 0 : #게임 시작 상태이면
             x = random.randrange(1,10)
-            alrm='Start the game'
-            print('Start the game')
+            alrm='Start game'
+            print('Start game')
             writer.write(alrm.encode('ascii'))
-
-
             
             for i in range(1,6) : #다섯 번 동안 반복
                 guess_str = yield from reader.read(4096)
-                guess=int(guess_str)
-                if guess == x: 
-                    print("Congratulations you did it.")
-                    text = '0'
-                    flag = 1
-                    writer.write(text.encode('ascii'))
-                    break
-                
-                elif guess < x :
-                    text = '1'
-                    print("You guessed too small!")
-                elif guess > x : 
-                    text = '2'
-                    print("You guessed too high!")
-                
-                writer.write(text.encode('ascii')) # 숫자 맞췄는지 여부 보냄
+                message = str(guess_str).split('\'')[1]
 
-        
+                if message == "end" :
+                    print('end the game')
+                    text = '3'
+                    writer.write(text.encode('ascii')) # 숫자 맞췄는지 여부 보냄
+                    break
+
+                elif guess_str.isdigit():
+                    guess=int(guess_str)
+                    if guess == x: 
+                        print("Congratulations you did it.")
+                        text = '0'
+                        flag = 1
+                        writer.write(text.encode('ascii'))
+                        i=0
+                        break
+                
+                    elif guess < x :
+                        text = '1'
+                        print("You guessed too small!")
+                    elif guess > x : 
+                        text = '2'
+                        print("You guessed too high!")
+                
+                    writer.write(text.encode('ascii')) # 숫자 맞췄는지 여부 보냄
+
+        else:
+            continue
 
 
 if __name__ == '__main__':
